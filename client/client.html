@@ -5,6 +5,54 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    const handleResponse = (response) => {
+
+      const content = document.getElementById('content');
+      const title = document.createElement('h1');
+      const message = document.createElement('p');
+
+      response.text().then((resText) => {
+
+        if(response.type === 'text/xml') {
+          const xmlResponse = new window.DOMParser().parseFromString(resText, 'text/xml');
+          title.innerHTML = xmlResponse.querySelector('id').innerHTML;
+          message.innerHTML = 'Message: ' + xmlResponse.querySelector('message').innerHTML;
+        } 
+        else {
+          const jsonResponse = JSON.parse(resText);
+          title.innerHTML = jsonResponse.id;
+          message.innerHTML = `Message: ${jsonResponse.message}`;
+        }
+
+        content.innerHTML = "";
+        content.appendChild(title);
+        content.appendChild(message);
+      });
+    };
+
+    const requestUpdate = async (url, type) => {   
+      let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': type,
+        },
+      });
+
+      handleResponse(response);
+    };
+
+    const init = () => {
+      const submit = document.getElementById('send');
+      
+      submit.onclick = function(){
+        const url = document.getElementById('page').value;
+        const type = document.getElementById('type').value;
+
+        requestUpdate(url, type);
+      }
+    };
+
+    window.onload = init;
 
   </script>
 </head>
